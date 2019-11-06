@@ -9,8 +9,9 @@ from time import sleep # Pauses code exection. Time passed to method in 'seconds
 import tkinter as tk # Library used to create the GUI and its widgets
 from tkinter import *
 
-mycolor = '#000000' # set your favourite rgb color
-mycolor2 = '#430040'  # or use hex if you prefer 
+mycolor = '#000000'
+mycolor2 = '#430040'
+
 
 class Application(tk.Frame):
     
@@ -26,6 +27,7 @@ class Application(tk.Frame):
         self.ip = tk.Label(self.root, text="IP:")
         self.mac = tk.Label(self.root, text="MAC:")
         self.network_status = tk.Label(self.root, text="NetStatus:")
+        self.last_ip = ""
         self.close_button = tk.Button(self.root, command=self.root.destroy, fg="red", text="Close")
         self.updateGUI()
     
@@ -79,19 +81,30 @@ class Application(tk.Frame):
             self.memory_stats["fg"] = "red"
             self.memory_stats["text"] = f"RAM: {int(mem.used/1000000)}MB used of {int(mem.total/1000000)}MB"        
         
-        net_results = self.check_network_status()
-        if net_results[1] == 4:
-            self.network_status["fg"] = "green"
-            self.network_status["text"] = f"NetStatus: Healthy | AvgLatency: {net_results[0]}"
-        elif net_results[1] < 4 and net_results[1] > 0:
-            self.network_status["fg"] = "orange"
-            self.network_status["text"] = f"NetStatus: Problems | AvgLatency: {float(net_results[0])} | Success: {net_results[1]} Fail: {net_results[2]}"
-        else:
+        # Network Status
+        try:
+            net_results = self.check_network_status()
+            if net_results[1] == 4:
+                self.network_status["fg"] = "green"
+                self.network_status["text"] = f"NetStatus: Healthy | AvgLatency: {net_results[0]}"
+            elif net_results[1] < 4 and net_results[1] > 0:
+                self.network_status["fg"] = "orange"
+                self.network_status["text"] = f"NetStatus: Problems | AvgLatency: {float(net_results[0])} | Success: {net_results[1]} Fail: {net_results[2]}"
+            else:
+                self.network_status["fg"] = "red"
+                self.network_status["text"] = f"NetStatus: '8.8.8.8' is unreachable. Likely network outage"
+        except OSError:
             self.network_status["fg"] = "red"
-            self.network_status["text"] = f"NetStatus: Failed | Success: {net_results[1]} Fail: {net_results[2]}"
+            self.network_status["text"] = f"Network is unreachable"
         
-        self.ip["fg"] = "white"
-        self.ip["text"] = f"IP: {self.find_network_ip()}"
+        # IP Address
+        current_ip = self.find_network_ip()
+        if current_ip != self.last_ip:
+            last_ip = current_ip
+            self.ip["fg"] = "white"
+            self.ip["text"] = f"IP: {last_ip}"
+        
+        # MAC Address
         self.mac["fg"] = "white"
         self.mac["text"] = f"MAC: {self.find_network_mac()}"
         self.root.update()
