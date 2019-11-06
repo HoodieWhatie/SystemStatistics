@@ -37,9 +37,6 @@ class Application(tk.Frame):
         self.ip.pack()
         self.mac.pack()
         self.close_button.pack()
-        #self.cpu_temp.after(1000, self.updateGUI)
-        #self.cpu_load.after(5000, self.updateGUI)
-        #self.memory_stats.after(1000, self.updateGUI)
         while True:
             self.updateGUI()
             sleep(2)
