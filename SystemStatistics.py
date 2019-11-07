@@ -6,12 +6,12 @@ from pyspectator.network import NetworkInterface # Library for access resource s
 from pythonping import ping # Library used for the simplified running of network commands
 import re # Regex for detecting patterns in strings
 import subprocess # Library for running terminal commands through Python
-from time import sleep # Pauses code exection. Time passed to method in 'seconds'
+from time import sleep # Pauses code exection. Time passed to method in "seconds"
 import tkinter as tk # Library used to create the GUI and its widgets
 from tkinter import *
 
-mycolor = '#000000'
-mycolor2 = '#430040'
+mycolor = "#000000"
+mycolor2 = "#430040"
 
 
 class Application(tk.Frame):
@@ -22,18 +22,31 @@ class Application(tk.Frame):
         self.last_ip = ""
         self.ping_lat_list = []
         
-        # Tkinter Elements
+        # Tkinter Window Elements
         self.master = master
-        self.master.tk_setPalette(background=mycolor, foreground='black',
-               activeBackground='black', activeForeground=mycolor2)
-        self.master.geometry("500x200")
+        self.master.tk_setPalette(background=mycolor, foreground="black",
+               activeBackground="black", activeForeground=mycolor2)
+        self.master.geometry("500x165")
         self.master.title("SystemStatistics")
-        self.cpu_temp = tk.Label(self.master, text="CPUTemp:")
-        self.cpu_load = tk.Label(self.master, text="CPULoad:")
-        self.memory_stats = tk.Label(self.master, text="RAM:")
+        
+        self.main_container = Frame(master)
+        self.top_frame = Frame(self.main_container)
+        self.bottom_frame = Frame(self.main_container)
+        self.top_left = Frame(self.top_frame)
+        self.top_right = Frame(self.top_frame)
+        self.main_container.pack(side="top", fill="both", expand=True)
+        self.top_frame.pack(side="top", fill="x", expand=False)
+        self.bottom_frame.pack(side="bottom", fill="both", expand=True)
+        self.top_left.pack(side="left", fill="x", expand=True)
+        self.top_right.pack(side="right", fill="x", expand=True)
+        
+        # Tkinter Widgets
+        self.cpu_temp = tk.Label(self.top_left, text="CPUTemp:", font="Helvetica 14 bold")
+        self.cpu_load = tk.Label(self.top_left, text="CPULoad:", font="Helvetica 14 bold", justify="left")
+        self.memory_stats = tk.Label(self.top_left, text="RAM:", font="Helvetica 14 bold", justify="left")
+        self.network_status = tk.Label(self.top_right, text="NetStatus:", font="Helvetica 14 bold", justify="right")
         self.ip = tk.Label(self.master, text="IP:")
         self.mac = tk.Label(self.master, text="MAC:")
-        self.network_status = tk.Label(self.master, text="NetStatus:")
         self.close_button = tk.Button(self.master, command=self.master.destroy, fg="red", text="Close")
         self.sleepTime = 500
         self.isStopped = False
@@ -88,23 +101,23 @@ class Application(tk.Frame):
         mem = self.find_memory_stats()
         if mem.percent < 50:
             self.memory_stats["fg"] = "green"
-            self.memory_stats["text"] = f"RAM: {int(mem.used/1000000)}MB used of {int(mem.total/1000000)}MB"
+            self.memory_stats["text"] = f"RAM: {int(mem.used/1000000)}MB of {int(mem.total/1000000)}MB"
         elif mem.percent >= 50 and mem.percent < 80:
             self.memory_stats["fg"] = "orange"
-            self.memory_stats["text"] = f"RAM: {int(mem.used/1000000)}MB used of {int(mem.total/1000000)}MB"
+            self.memory_stats["text"] = f"RAM: {int(mem.used/1000000)}MB of {int(mem.total/1000000)}MB"
         else:
             self.memory_stats["fg"] = "red"
-            self.memory_stats["text"] = f"RAM: {int(mem.used/1000000)}MB used of {int(mem.total/1000000)}MB"        
+            self.memory_stats["text"] = f"RAM: {int(mem.used/1000000)}MB of {int(mem.total/1000000)}MB"        
         
         # Network Status
         try:
             net_results = self.check_network_status()
             if net_results[1] == 4:
                 self.network_status["fg"] = "green"
-                self.network_status["text"] = f"NetStatus: Good\nLatency: Avg({net_results[0]}ms) Max({net_results[3]}ms) Min({net_results[4]}ms)"
+                self.network_status["text"] = f"NetStatus: Good\nLatency: Avg({net_results[0]}ms)\nMax({net_results[3]}ms)\nMin({net_results[4]}ms)"
             elif net_results[1] < 4 and net_results[1] > 0:
                 self.network_status["fg"] = "orange"
-                self.network_status["text"] = f"NetStatus: Poor\nLatency: Avg({net_results[0]}ms) Max({net_results[3]}ms) Min({net_results[4]}ms)"
+                self.network_status["text"] = f"NetStatus: Poor\nLatency: Avg({net_results[0]}ms)\nMax({net_results[3]}ms)\nMin({net_results[4]}ms)"
             else:
                 self.network_status["fg"] = "red"
                 self.network_status["text"] = f"NetStatus: '8.8.8.8' is unreachable."
@@ -137,7 +150,7 @@ class Application(tk.Frame):
         
             match = re.search("(\d+\.\d+)ms", reply)
             
-            if 'group' in dir(match):
+            if "group" in dir(match):
                 pings[ping_count] = (match.group(1), True)
             else:
                 pings[ping_count] = ("Failed", False)
@@ -159,7 +172,6 @@ class Application(tk.Frame):
                     self.ping_lat_list = self.ping_lat_list[:49]
                     self.ping_lat_list.append(_min)
                     self.ping_lat_list.append(_max)
-            print(f"PingListLen: {len(self.ping_lat_list)}")
             return (float(latency),successes,failures,max(self.ping_lat_list),min(self.ping_lat_list))
         else:
             return (0,successes,failures)
