@@ -1,3 +1,4 @@
+import math
 import os # Allows access to system statistics
 import psutil # Allows access to virtual memor stats
 from pyspectator.processor import Cpu # Python library for access resource stats (CPU)
@@ -16,6 +17,11 @@ mycolor2 = '#430040'
 class Application(tk.Frame):
     
     def __init__(self, master=None):
+        # Object Variables
+        self.last_ip = ""
+        self.ping_lat_list = []
+        
+        # Tkinter Elements
         self.root = tk.Tk()
         self.root.tk_setPalette(background=mycolor, foreground='black',
                activeBackground='black', activeForeground=mycolor2)
@@ -27,7 +33,6 @@ class Application(tk.Frame):
         self.ip = tk.Label(self.root, text="IP:")
         self.mac = tk.Label(self.root, text="MAC:")
         self.network_status = tk.Label(self.root, text="NetStatus:")
-        self.last_ip = ""
         self.close_button = tk.Button(self.root, command=self.root.destroy, fg="red", text="Close")
         self.updateGUI()
     
@@ -86,16 +91,16 @@ class Application(tk.Frame):
             net_results = self.check_network_status()
             if net_results[1] == 4:
                 self.network_status["fg"] = "green"
-                self.network_status["text"] = f"NetStatus: Healthy | AvgLatency: {net_results[0]}"
+                self.network_status["text"] = f"NetStatus: Good\nLatency: Avg({net_results[0]}ms) Max({net_results[3]}ms) Min({net_results[4]}ms)"
             elif net_results[1] < 4 and net_results[1] > 0:
                 self.network_status["fg"] = "orange"
-                self.network_status["text"] = f"NetStatus: Problems | AvgLatency: {float(net_results[0])} | Success: {net_results[1]} Fail: {net_results[2]}"
+                self.network_status["text"] = f"NetStatus: Poor\nLatency: Avg({net_results[0]}ms) Max({net_results[3]}ms) Min({net_results[4]}ms)"
             else:
                 self.network_status["fg"] = "red"
-                self.network_status["text"] = f"NetStatus: '8.8.8.8' is unreachable. Likely network outage"
+                self.network_status["text"] = f"NetStatus: '8.8.8.8' is unreachable."
         except OSError:
             self.network_status["fg"] = "red"
-            self.network_status["text"] = f"Network is unreachable"
+            self.network_status["text"] = f"NetStatus: Failed"
         
         # IP Address
         current_ip = self.find_network_ip()
@@ -131,14 +136,18 @@ class Application(tk.Frame):
         
         for i in range(len(pings)):
             if pings[i][1] == True:
-                latency += float(pings[i][0])
+                self.ping_lat_list.append(float(pings[i][0]))
+                #print(f"list:{self.ping_lat_list}")
+                #print(f"max: {max(self.ping_lat_list)}")
+                #print(f"min: {min(self.ping_lat_list)}")
+                #print(f"avg: {sum(self.ping_lat_list)/float(len(self.ping_lat_list))}")
                 successes += 1
             else:
                 failures += 1
         
-        if latency > 0:
-            latency = "%.2f" % (latency/successes)
-            return (float(latency),successes,failures)
+        if successes > 0:
+            latency = "%.2f" % (sum(self.ping_lat_list)/float(len(self.ping_lat_list)))
+            return (float(latency),successes,failures,max(self.ping_lat_list),min(self.ping_lat_list))
         else:
             return (0,successes,failures)
         
