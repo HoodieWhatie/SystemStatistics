@@ -36,6 +36,7 @@ class Application(tk.Frame):
         self.close_button = tk.Button(self.root, command=self.root.destroy, fg="red", text="Close")
         self.updateGUI()
     
+    
     def run(self):
         self.cpu_temp.pack()
         self.cpu_load.pack()
@@ -48,6 +49,7 @@ class Application(tk.Frame):
             self.updateGUI()
             sleep(2)
         self.root.mainloop()
+    
             
     def updateGUI(self):
         # CPU Temp
