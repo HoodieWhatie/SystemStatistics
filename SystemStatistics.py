@@ -16,41 +16,49 @@ mycolor2 = '#430040'
 
 class Application(tk.Frame):
     
-    def __init__(self, master=None):
+    def __init__(self, master):
+        
         # Object Variables
         self.last_ip = ""
         self.ping_lat_list = []
         
         # Tkinter Elements
-        self.root = tk.Tk()
-        self.root.tk_setPalette(background=mycolor, foreground='black',
+        self.master = master
+        self.master.tk_setPalette(background=mycolor, foreground='black',
                activeBackground='black', activeForeground=mycolor2)
-        self.root.geometry("500x150")
-        self.root.title("SystemStatistics")
-        self.cpu_temp = tk.Label(self.root, text="CPUTemp:")
-        self.cpu_load = tk.Label(self.root, text="CPULoad:")
-        self.memory_stats = tk.Label(self.root, text="RAM:")
-        self.ip = tk.Label(self.root, text="IP:")
-        self.mac = tk.Label(self.root, text="MAC:")
-        self.network_status = tk.Label(self.root, text="NetStatus:")
-        self.close_button = tk.Button(self.root, command=self.root.destroy, fg="red", text="Close")
-        self.updateGUI()
-        #
-    
+        self.master.geometry("500x200")
+        self.master.title("SystemStatistics")
+        self.cpu_temp = tk.Label(self.master, text="CPUTemp:")
+        self.cpu_load = tk.Label(self.master, text="CPULoad:")
+        self.memory_stats = tk.Label(self.master, text="RAM:")
+        self.ip = tk.Label(self.master, text="IP:")
+        self.mac = tk.Label(self.master, text="MAC:")
+        self.network_status = tk.Label(self.master, text="NetStatus:")
+        self.close_button = tk.Button(self.master, command=self.master.destroy, fg="red", text="Close")
+        self.sleepTime = 500
+        self.isStopped = False
+        self.master.after(self.sleepTime, self.run)
+        self.master.mainloop()
+        
     def run(self):
-        self.cpu_temp.pack()
-        self.cpu_load.pack()
-        self.memory_stats.pack()
-        self.network_status.pack()
-        self.ip.pack()
-        self.mac.pack()
-        self.close_button.pack()
-        while True:
+        if not self.isStopped:
+            self.cpu_temp.pack()
+            self.cpu_load.pack()
+            self.memory_stats.pack()
+            self.network_status.pack()
+            self.ip.pack()
+            self.mac.pack()
+            self.close_button.pack()
             self.updateGUI()
-            sleep(2)
-        self.root.mainloop()
+            self.master.after(self.sleepTime, self.run)
+      
+    def destroyMe(self):
+        self.master.destroy()
     
-            
+    def destroyApplication(self,timeToSleep=0):
+        if timeToSleep > 0:
+            self.master.after(timeToSleep*1000, self.destroyMe)
+      
     def updateGUI(self):
         # CPU Temp
         _cpu_temp = float(self.find_cpu_temp())
@@ -114,7 +122,7 @@ class Application(tk.Frame):
         # MAC Address
         self.mac["fg"] = "white"
         self.mac["text"] = f"MAC: {self.find_network_mac()}"
-        self.root.update()
+        self.master.update()
         
     def check_network_status(self):
         
@@ -139,16 +147,19 @@ class Application(tk.Frame):
         for i in range(len(pings)):
             if pings[i][1] == True:
                 self.ping_lat_list.append(float(pings[i][0]))
-                #print(f"list:{self.ping_lat_list}")
-                #print(f"max: {max(self.ping_lat_list)}")
-                #print(f"min: {min(self.ping_lat_list)}")
-                #print(f"avg: {sum(self.ping_lat_list)/float(len(self.ping_lat_list))}")
                 successes += 1
             else:
                 failures += 1
         
         if successes > 0:
             latency = "%.2f" % (sum(self.ping_lat_list)/float(len(self.ping_lat_list)))
+            if len(self.ping_lat_list) > 100:
+                    _min = min(self.ping_lat_list)
+                    _max = max(self.ping_lat_list)
+                    self.ping_lat_list = self.ping_lat_list[:49]
+                    self.ping_lat_list.append(_min)
+                    self.ping_lat_list.append(_max)
+            print(f"PingListLen: {len(self.ping_lat_list)}")
             return (float(latency),successes,failures,max(self.ping_lat_list),min(self.ping_lat_list))
         else:
             return (0,successes,failures)
@@ -179,6 +190,8 @@ class Application(tk.Frame):
 
 
 if __name__ == "__main__":
-    Application().run()
+    root = tk.Tk()
+    application = Application(root)
+    root.mainloop()
 
 
