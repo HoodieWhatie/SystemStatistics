@@ -35,7 +35,7 @@ class Application(tk.Frame):
         self.network_status = tk.Label(self.root, text="NetStatus:")
         self.close_button = tk.Button(self.root, command=self.root.destroy, fg="red", text="Close")
         self.updateGUI()
-    
+        #
     
     def run(self):
         self.cpu_temp.pack()
