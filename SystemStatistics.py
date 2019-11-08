@@ -13,6 +13,18 @@ from tkinter import *
 mycolor = "#000000"
 mycolor2 = "#430040"
 
+# ASCII Codes
+#
+# 35: #
+# 4510: ᆞ
+# 8718: ∎
+
+
+# ToDoList
+#  
+# 1) Switch between C and F for CPU temp with radio button
+# 2) Create "percentage bars" for CPU Load, RAM Utilization
+
 
 class Application(tk.Frame):
     
@@ -21,26 +33,40 @@ class Application(tk.Frame):
         # Object Variables
         self.last_ip = ""
         self.ping_lat_list = []
+        self.sleepTime = 1000
+        self.isStopped = False
         
-        # Tkinter Window Elements
+        # Create Window Elements
         self.master = master
-        self.master.tk_setPalette(background=mycolor, foreground="black",
-               activeBackground="black", activeForeground=mycolor2)
+        self.build_master_window(self.master)
+        self.positioning_frames(self.master)
+        self.widgets(self.master)
+        self.menus(self.master)
+        self.master.after(self.sleepTime, self.run)
+        self.master.mainloop()
+        
+    def build_master_window(self, master):
+        self.master.tk_setPalette(background=mycolor, foreground="black", activeBackground="black", activeForeground=mycolor2)
         self.master.geometry("500x165")
         self.master.title("SystemStatistics")
         
+    def positioning_frames(self, master):
         self.main_container = Frame(master)
         self.top_frame = Frame(self.main_container)
         self.bottom_frame = Frame(self.main_container)
         self.top_left = Frame(self.top_frame)
         self.top_right = Frame(self.top_frame)
+        self.bottom_left = Frame(self.bottom_frame)
+        self.bottom_right = Frame(self.bottom_frame)
         self.main_container.pack(side="top", fill="both", expand=True)
         self.top_frame.pack(side="top", fill="x", expand=False)
         self.bottom_frame.pack(side="bottom", fill="both", expand=True)
         self.top_left.pack(side="left", fill="x", expand=True)
         self.top_right.pack(side="right", fill="x", expand=True)
-        
-        # Tkinter Widgets
+        self.bottom_left.pack(side="left", fill="x", expand=True)
+        self.bottom_right.pack(side="right", fill="x", expand=True)
+     
+    def widgets(self, master):
         self.cpu_temp = tk.Label(self.top_left, text="CPUTemp:", font="Helvetica 14 bold")
         self.cpu_load = tk.Label(self.top_left, text="CPULoad:", font="Helvetica 14 bold", justify="left")
         self.memory_stats = tk.Label(self.top_left, text="RAM:", font="Helvetica 14 bold", justify="left")
@@ -48,10 +74,13 @@ class Application(tk.Frame):
         self.ip = tk.Label(self.master, text="IP:")
         self.mac = tk.Label(self.master, text="MAC:")
         self.close_button = tk.Button(self.master, command=self.master.destroy, fg="red", text="Close")
-        self.sleepTime = 500
-        self.isStopped = False
-        self.master.after(self.sleepTime, self.run)
-        self.master.mainloop()
+        
+    def menus(self, master):
+        self.menu01 = tk.Menu(self.master,fg="white", bg="grey")
+        self.submenu01 = tk.Menu(self.menu01, tearoff=False)
+        self.submenu01.add_command(label="Options",command=self.OpenOptionsMenu)
+        self.menu01.add_cascade(label="File", menu=self.submenu01)
+        self.master.config(menu=self.menu01)
         
     def run(self):
         if not self.isStopped:
@@ -71,6 +100,9 @@ class Application(tk.Frame):
     def destroyApplication(self,timeToSleep=0):
         if timeToSleep > 0:
             self.master.after(timeToSleep*1000, self.destroyMe)
+      
+    def OpenOptionsMenu(self):
+        print("Hey, hey, hey! Im FAT32!")
       
     def updateGUI(self):
         # CPU Temp
@@ -205,5 +237,3 @@ if __name__ == "__main__":
     root = tk.Tk()
     application = Application(root)
     root.mainloop()
-
-
