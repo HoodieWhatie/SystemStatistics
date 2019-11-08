@@ -9,6 +9,7 @@ import subprocess # Library for running terminal commands through Python
 from time import sleep # Pauses code exection. Time passed to method in "seconds"
 import tkinter as tk # Library used to create the GUI and its widgets
 from tkinter import *
+from Classes import TestClass
 
 mycolor = "#000000"
 mycolor2 = "#430040"
@@ -235,6 +236,7 @@ class Application(tk.Frame):
 
 
 if __name__ == "__main__":
+    TestClass("Yay! I got it. :)")
     root = tk.Tk()
     application = Application(root)
     root.mainloop()
