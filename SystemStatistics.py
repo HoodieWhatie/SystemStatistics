@@ -24,6 +24,7 @@ mycolor2 = "#430040"
 #  
 # 1) Switch between C and F for CPU temp with radio button
 # 2) Create "percentage bars" for CPU Load, RAM Utilization
+# 3) Add Menu system with options
 
 
 class Application(tk.Frame):
