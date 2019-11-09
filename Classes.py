@@ -54,13 +54,13 @@ class MainWindow():
                                         "relief"          : "flat",
                                         "highlightcolor"  : "spring green"}},
         
-        "TFrame":             {"configure": {"background"      : "black",
-                                        "foreground"      : "black",
-                                        "relief"          : "flat",
-                                        "highlightcolor"  : "spring green"}},
+        "TFrame":             {"configure": {"background"      : "midnight blue",
+                                             "foreground"      : "black",
+                                             "relief"          : "flat",
+                                             "highlightcolor"  : "spring green"}},
 
-        "TLabel":        {"configure": {"foreground"      : "spring green",
-                                        "background"      : "black",
+        "TLabel":        {"configure": {"foreground"      : "black",
+                                        "background"      : "midnight blue",
                                         "padding"         : 0,
                                         "font"            : ("Calibri", 12)}},
 
@@ -76,7 +76,7 @@ class MainWindow():
                                         "foreground"      : "black"}},
 
         "TButton":       {"configure": {"font"            :("Calibri", 13, 'bold'),
-                                        "background"      : "black",
+                                        "background"      : "midnight blue",
                                         "foreground"      : "red"},
                             "map"      : {"background"      : [("active", "spring green")],
                                         "foreground"      : [("active", 'black')]}},
@@ -85,7 +85,7 @@ class MainWindow():
         "Horizontal.TProgressbar":{"configure": {"background": "slate gray"}}
         })
         self.style.theme_use("app_style")
-        self.master.geometry("500x165")
+        self.master.geometry("600x150")
         self.master.title("SystemStatistics")
         
     def positioning_frames(self):
@@ -98,19 +98,21 @@ class MainWindow():
         self.bottom_right = ttk.Frame(self.bottom_frame, style="TFrame")
         self.main_container.pack(side="top", fill="both", expand=True)
         self.top_frame.pack(side="top", fill="x", expand=False)
-        self.bottom_frame.pack(side="bottom", fill="both", expand=True)
-        self.top_left.pack(side="left", fill="x", expand=True)
-        self.top_right.pack(side="right", fill="x", expand=True)
+        self.bottom_frame.pack(side="bottom", fill="both", expand=False)
+        self.top_left.pack(side="left", fill="x", padx=0, pady=0, expand=False)
+        self.top_right.pack(side="right", fill="x", expand=False)
         self.bottom_left.pack(side="left", fill="x", expand=True)
         self.bottom_right.pack(side="right", fill="x", expand=True)
-     
+
     def widgets(self):
-        self.cpu_temp = ttk.Label(self.top_left, text="CPUTemp:", font="Helvetica 14 bold")
-        self.cpu_load = ttk.Label(self.top_left, text="CPULoad:", font="Helvetica 14 bold", justify="left")
-        self.memory_stats = ttk.Label(self.top_left, text="RAM:", font="Helvetica 14 bold", justify="left")
-        self.network_status = ttk.Label(self.top_right, text="NetStatus:", font="Helvetica 14 bold", justify="right")
+        self.cpu_temp = ttk.Label(self.top_left, text="CPUTemp:", font="Calibri 12 bold", justify="left")
+        self.cpu_load = ttk.Label(self.top_left, text="CPULoad:", font="Calibri 12 bold", justify="left")
+        self.memory_stats = ttk.Label(self.top_left, text="RAM:", font="Calibri 12 bold", justify="left")
+        self.network_status = ttk.Label(self.top_right, text="NetStatus:", font="Calibri 12 bold", justify="right")
         self.ip = ttk.Label(self.bottom_frame, text="IP:")
         self.mac = ttk.Label(self.bottom_frame, text="MAC:")
+        self.cpu_load_perc_bar = ttk.Label(self.top_frame, font="Calibri 8 bold", text="")
+        self.mem_load_perc_bar = ttk.Label(self.top_frame, font="Calibri 8 bold", text="")
         self.close_button = ttk.Button(self.bottom_frame, command=self.master.destroy, text="Close",style="TButton")
         
     def menus(self):
@@ -126,6 +128,8 @@ class MainWindow():
             self.cpu_load.pack()
             self.memory_stats.pack()
             self.network_status.pack()
+            self.cpu_load_perc_bar.pack()
+            self.mem_load_perc_bar.pack()
             self.ip.pack()
             self.mac.pack()
             self.close_button.pack()
@@ -167,6 +171,13 @@ class MainWindow():
             self.cpu_load["foreground"] = "red"
             self.cpu_load["text"] = f"CPULoad: {_cpu_load}%"
         
+        cpu_perc_on = chr(8718)
+        cpu_perc_off = chr(4510)
+        cpu_perc_on_count = cpu_perc_on * int((_cpu_load/10) + 1)
+        cpu_perc_off_count = cpu_perc_off * (11 - len(cpu_perc_on_count))
+        self.cpu_load_perc_bar["foreground"] = "violet red"
+        self.cpu_load_perc_bar["text"] = f"CPU Load:\n[{cpu_perc_on_count}{cpu_perc_off_count}]"
+        
         # Memory
         mem = self.find_memory_stats()
         if mem.percent < 50:
@@ -178,6 +189,22 @@ class MainWindow():
         else:
             self.memory_stats["foreground"] = "red"
             self.memory_stats["text"] = f"RAM: {int(mem.used/1000000)}MB of {int(mem.total/1000000)}MB"        
+        
+        # ASCII Codes
+        #
+        # 35: #
+        # 4510: ᆞ
+        # 8718: ∎
+        #
+        mem_perc_on = chr(8718)
+        mem_perc_off = chr(4510)
+        mem_used = float("%.2f" % (mem.used/1000000))
+        mem_total = float("%.2f" % (mem.total/1000000))
+        mem_perc = int(float("%.2f" % (int(mem.used/1000000)/float(mem.total/1000000)*100.0))/10)
+        mem_perc_on_count = mem_perc_on * (mem_perc + 1)
+        mem_perc_off_count = mem_perc_off * (11 - len(mem_perc_on_count))
+        self.mem_load_perc_bar["foreground"] = "violet red"
+        self.mem_load_perc_bar["text"] = f"RAM Load:\n[{mem_perc_on_count}{mem_perc_off_count}]"
         
         # Network Status
         try:
