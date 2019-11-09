@@ -28,4 +28,4 @@ You should now see a window appear with statistics updating every 2 seconds by d
 <b>Notes:</b>
 As this program needs to be run as sudo I find it the easiest to edit the script in a text editor, save it and then launch from a terminal window using the steps laid out above.
 
-If you want to modify the frequency of the GUI updating the system statistics, navigate to the `run()` method in the `Application` class and change the value being passed to the `sleep()` method.
+If you want to modify the frequency of the GUI updating the system statistics, navigate to the `__init__()` method in the `MainWindow` class and change the value of the `self.sleepTime()`.
