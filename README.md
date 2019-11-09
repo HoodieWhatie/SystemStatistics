@@ -5,10 +5,10 @@
 There is always a chance that some of the underlying evironment on your device is different and that can cause certain commands to vary and potentialy throw exceptions. 
 2) You will need to confirm that you have python3.x installed on your device. 
 This can be accomplished by typing `python3` into your terminal and pressing `Enter` inside your bash terminal. 
-Else you will need to install Python3 by running `sudo apt-get install python3.6`
+Else you will need to install Python3 by running `sudo apt-get install python3.8`
 
 <b>Prepping your environment:</b>
-One of the libraries used, `pythonping`, controls the socket layer of the OS and can only be modified by the root user. This also means that `$ sudo pip3` and `$ sudo python3` have to be used when installing the Python libraries and when executing the script.
+One of the libraries used, `pythonping`, controls the socket layer of the OS and can only be modified by the root user. This also means that `$ sudo pip3` and `$ sudo python3` have to be used when installing the Python libraries and when executing the script. You can also launch the code in your IDE of choice by exectuing `$ sudo <IDE> SystemStatistics.py` ie. `sudo thonny SystemStatistics.py`
 
 1) Download and save the SystemStatistics.py file to your device in the directory of your choosing. I use   `home/pi/Documents/Python`
 
