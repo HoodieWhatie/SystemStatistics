@@ -11,10 +11,11 @@ Else you will need to install Python3 by running `sudo apt-get install python<la
 One of the libraries used, `pythonping`, controls the socket layer of the OS and can only be modified by the root user. This also means that `$ sudo pip3` and `$ sudo python3` have to be used when installing the Python libraries and when executing the script. You can also launch the code in your IDE of choice (im using Thonny) by executing a terminal command like
 `$ sudo thonny SystemStatistics.py`
 
-1) Download and save the SystemStatistics.py file to your device in the directory of your choosing. I use   `home/pi/Documents/Python`
+1) Download and save the SystemStatistics.py file to your device in the directory of your choosing.  
+I use `home/pi/Documents/Python`
 
-2) Run the following commands in your bash terminal:\n
-`$ sudo pip3 install pyspectator`
+2) Run the following commands in your bash terminal:  
+`$ sudo pip3 install pyspectator`  
 `$ sudo pip3 install pythonping`
 
 
