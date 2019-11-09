@@ -12,11 +12,7 @@ from tkinter.ttk import *
 mycolor = "#000000"
 mycolor2 = "#430040"
 
-# ASCII Codes
-#
-# 35: #
-# 4510: ᆞ
-# 8718: ∎
+
 
 
 # ToDoList
@@ -118,7 +114,7 @@ class MainWindow():
     def menus(self):
         self.menu01 = tk.Menu(self.master)
         self.submenu01 = tk.Menu(self.menu01, tearoff=False)
-        self.submenu01.add_command(label="Options",command=self.OpenOptionsMenu)
+        self.submenu01.add_command(label="Options",command=self.loadOptionsMenu)
         self.menu01.add_cascade(label="File", menu=self.submenu01)
         self.master.config(menu=self.menu01)
         
@@ -143,8 +139,11 @@ class MainWindow():
         if timeToSleep > 0:
             self.master.after(timeToSleep*1000, self.destroyMe)
       
-    def OpenOptionsMenu(self):
-        print("Hey, hey, hey! Im FAT32!")
+    def loadOptionsMenu(self):
+        optionsMenu = tk.Toplevel(self.master)
+        optionsMenu.title("Options")
+        optionsMenu.geometry("300x300")
+        
       
     def updateGUI(self):
         # CPU Temp
@@ -296,3 +295,63 @@ class MainWindow():
         
         cpu = Cpu(monitoring_latency=1)
         return cpu.load
+
+
+class OptionsMenu():
+    
+    def __init__(self, master):
+        
+        # Object Variables
+        self.last_ip = ""
+        self.pingLatList = []
+        self.sleepTime = 1000
+        self.isStopped = False
+        
+        # Create Window Elements
+        self.master = master
+        self.build_master_window()
+        self.positioning_frames()
+        self.widgets()
+        self.menus()
+        self.master.after(self.sleepTime, self.run)
+        self.master.mainloop()
+
+    def build_master_window(self):
+        self.style.theme_use("app_style")
+        self.master.geometry("150x150")
+        self.master.title("SystemStatistics")
+        
+    def positioning_frames(self):
+        self.main_container = ttk.Frame(self.master, style="TFrame")
+        self.top_frame = ttk.Frame(self.main_container, style="TFrame")
+        self.bottom_frame = ttk.Frame(self.main_container, style="TFrame")
+        self.top_left = ttk.Frame(self.top_frame, style="TFrame")
+        self.top_right = ttk.Frame(self.top_frame, style="TFrame")
+        self.bottom_left = ttk.Frame(self.bottom_frame, style="TFrame")
+        self.bottom_right = ttk.Frame(self.bottom_frame, style="TFrame")
+        self.main_container.pack(side="top", fill="both", expand=True)
+        self.top_frame.pack(side="top", fill="x", expand=False)
+        self.bottom_frame.pack(side="bottom", fill="both", expand=False)
+        self.top_left.pack(side="left", fill="x", padx=0, pady=0, expand=False)
+        self.top_right.pack(side="right", fill="x", expand=False)
+        self.bottom_left.pack(side="left", fill="x", expand=True)
+        self.bottom_right.pack(side="right", fill="x", expand=True)
+
+    def widgets(self):
+        self.close_button = ttk.Button(self.bottom_frame, command=self.master.destroy, text="Close",style="TButton")
+        
+    def run(self):
+        if not self.isStopped:
+            self.close_button.pack(bottom_frame, style="TButton")
+            self.updateGUI()
+            self.master.after(self.sleepTime, self.run)
+      
+    def destroyMe(self):
+        self.master.destroy()
+    
+    def destroyApplication(self,timeToSleep=0):
+        if timeToSleep > 0:
+            self.master.after(timeToSleep*1000, self.destroyMe)
+      
+    def updateGUI(self):
+        print("updating gui")
