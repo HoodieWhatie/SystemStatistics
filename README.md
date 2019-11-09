@@ -20,7 +20,8 @@ I use `home/pi/Documents/Python`
 
 
 <b>Running the script:</b>
-Now, `cd` to the directory that you placed the python script and run `$ sudo python3 SystemStatistics.py` 
+Now, `cd` to the directory that you placed the python script and run:  
+`$ sudo python3 SystemStatistics.py` 
 
 You should now see a window appear with statistics updating every 2 seconds by default.
 
