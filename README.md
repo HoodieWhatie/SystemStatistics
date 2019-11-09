@@ -13,7 +13,7 @@ One of the libraries used, `pythonping`, controls the socket layer of the OS and
 
 1) Download and save the SystemStatistics.py file to your device in the directory of your choosing. I use   `home/pi/Documents/Python`
 
-2) Run the following commands in your bash terminal:
+2) Run the following commands in your bash terminal:\n
 `$ sudo pip3 install pyspectator`
 `$ sudo pip3 install pythonping`
 
