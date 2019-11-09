@@ -25,6 +25,6 @@ Now, `cd` to the directory that you placed the python script and run:
 You should now see a window appear with statistics updating every 2 seconds by default.
 
 <b>Notes:</b>
-As this program needs to be run as sudo I find it the easiest to run the code in your IDE of choice (im using Thonny) by executing a terminal command like `$ sudo thonny SystemStatistics.py`
+As this program needs to be run as `sudo`, I find it the easiest to "sudo run" the code in your IDE of choice (im using Thonny) from the terminal using the appropriate command like: `$ sudo thonny SystemStatistics.py`
 
 If you want to modify the frequency of the GUI updating the system statistics, navigate to the `__init__()` method in the `MainWindow` class and change the value of the `self.sleepTime()`.
