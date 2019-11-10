@@ -12,18 +12,15 @@ from tkinter.ttk import *
 mycolor = "#000000"
 mycolor2 = "#430040"
 
-
-
-
 # ToDoList
 #  
 # 1) Switch between C and F for CPU temp with radio button
 # 2) Create "percentage bars" for CPU Load, RAM Utilization
 # 3) Add Menu system with options
-
-    #    
-    # Main Window (MW)
-    #
+#
+#    
+# Main Window (MW)
+#
 class MainWindow():
     def __init__(self, master):
         
@@ -32,6 +29,7 @@ class MainWindow():
         self.pingLatList = []
         self.sleepTime = 1000
         self.isStopped = False
+        self.cpuTempCelsius = True
         
         # Create Window Elements
         self.master = master
@@ -48,7 +46,7 @@ class MainWindow():
         #self.master.tk_setPalette(background=mycolor, foreground="black", activeBackground="white", activeForeground="black")
         self.style = ttk.Style()
         self.style.theme_create("app_style", parent="alt",settings={
-        ".":             {"configure": {"background"      : "dim grey",
+        ".":             {"configure": {"background"      : "midnight blue",
                                         "foreground"      : "light grey",
                                         "relief"          : "flat",
                                         "highlightcolor"  : "spring green"}},
@@ -77,6 +75,7 @@ class MainWindow():
         "TButton":       {"configure": {"font"            :("Calibri", 13, 'bold'),
                                         "background"      : "midnight blue",
                                         "foreground"      : "red"},
+                                        "relief"          : "groove",
                             "map"      : {"background"      : [("active", "spring green")],
                                         "foreground"      : [("active", 'black')]}},
             
@@ -143,38 +142,69 @@ class MainWindow():
             self.updateGUI()
             self.master.after(self.sleepTime, self.run)
     #    
-    # MW.Destroy Me
-    #      
-    def destroyMe(self):
-        self.master.destroy()
-    #    
-    # MW.Destroy Application
-    #    
-    def destroyApplication(self,timeToSleep=0):
-        if timeToSleep > 0:
-            self.master.after(timeToSleep*1000, self.destroyMe)
-    #    
     # MW.Load Options Menu
     #     
     def loadOptionsMenu(self):
-        optionsMenu = tk.Toplevel(self.master)
-        optionsMenu.title("Options")
-        optionsMenu.geometry("300x300")
+        self.optionsMenu = tk.Toplevel(self.master)
+        self.optionsMenu.title("Options")
+        self.optionsMenu.geometry("300x45")
+        self.optionsMenu.main_container = ttk.Frame(self.optionsMenu, style="TFrame")
+        self.optionsMenu.main_container.pack(side="top", fill="both", expand=True)
+        self.loadOptionsWidgets()
+        self.runOptionsMenu()
+    #
+    # MW.Load Options Widgets
+    #
+    def loadOptionsWidgets(self):
+        self.optionsMenu.celsiusCheckbutton = ttk.Checkbutton(self.optionsMenu.main_container,text="Toggle ˚F",
+                                                         variable=self.cpuTempCelsius,command=self.toggleCelsius)
+        self.optionsMenu.closeButton = ttk.Button(self.optionsMenu.main_container,text="Close",command=self.closeMenu,style="TButton")
+    #
+    # MW.Run Options Menu
+    #
+    def runOptionsMenu(self):
+        self.optionsMenu.celsiusCheckbutton.pack()
+        self.optionsMenu.closeButton.pack()
+    #
+    # MW.Toggle Celsius
+    #
+    def toggleCelsius(self):
+        if self.cpuTempCelsius:
+            self.cpuTempCelsius = False
+        else:
+            self.cpuTempCelsius = True
+    #
+    # MW.Celsius Toggle
+    #
+    def closeMenu(self):
+            self.optionsMenu.destroy()
     #    
     # MW.Update GUI
     #
     def updateGUI(self):
-        # CPU Temp
-        _cpu_temp = float(self.find_cpu_temp())
-        if _cpu_temp < 70:
-            self.cpu_temp["foreground"] = "green"
-            self.cpu_temp["text"] = f"CPUTemp: {_cpu_temp}C"
-        elif _cpu_temp >= 71 and _cpu_temp < 85:
-            self.cpu_temp["foreground"] = "orange"
-            self.cpu_temp["text"] = f"CPUTemp: {_cpu_temp}C"
-        else:
-            self.cpu_temp["foreground"] = "red"
-            self.cpu_temp["text"] = f"CPUTemp: {_cpu_temp}C"
+        # CPU Temp 
+        if self.cpuTempCelsius: 
+            _cpu_temp = float(self.find_cpu_temp()) # CELSIUS
+            if _cpu_temp < 70:
+                self.cpu_temp["foreground"] = "green"
+                self.cpu_temp["text"] = f"CPUTemp: {_cpu_temp}˚C"
+            elif _cpu_temp >= 71 and _cpu_temp < 85:
+                self.cpu_temp["foreground"] = "orange"
+                self.cpu_temp["text"] = f"CPUTemp: {_cpu_temp}˚C"
+            else:
+                self.cpu_temp["foreground"] = "red"
+                self.cpu_temp["text"] = f"CPUTemp: {_cpu_temp}˚C"
+        else: 
+            _cpu_temp = int(float("%.2f" % ((float(self.find_cpu_temp()) * (9/5))+32))) # FARENHEIT
+            if _cpu_temp < 158:
+                self.cpu_temp["foreground"] = "green"
+                self.cpu_temp["text"] = f"CPUTemp: {_cpu_temp}˚F"
+            elif _cpu_temp >= 159 and _cpu_temp < 185:
+                self.cpu_temp["foreground"] = "orange"
+                self.cpu_temp["text"] = f"CPUTemp: {_cpu_temp}˚F"
+            else:
+                self.cpu_temp["foreground"] = "red"
+                self.cpu_temp["text"] = f"CPUTemp: {_cpu_temp}˚F"
         
         # CPU Load
         _cpu_load = self.find_cpu_load()
@@ -187,7 +217,7 @@ class MainWindow():
         else:
             self.cpu_load["foreground"] = "red"
             self.cpu_load["text"] = f"CPULoad: {_cpu_load}%"
-        
+        # CPU Load Bar
         cpu_perc_on = chr(8718)
         cpu_perc_off = chr(4510)
         cpu_perc_on_count = cpu_perc_on * int((_cpu_load/10) + 1)
@@ -206,12 +236,12 @@ class MainWindow():
         else:
             self.memory_stats["foreground"] = "red"
             self.memory_stats["text"] = f"RAM: {int(mem.used/1000000)}MB of {int(mem.total/1000000)}MB"        
-
+        # Memory Bar
         mem_perc_on = chr(8718)
         mem_perc_off = chr(4510)
         mem_used = float("%.2f" % (mem.used/1000000))
         mem_total = float("%.2f" % (mem.total/1000000))
-        mem_perc = int(float("%.2f" % (int(mem.used/1000000)/float(mem.total/1000000)*100.0))/10)
+        mem_perc = int(float("%.2f" % (int(mem_used/1000000)/float(mem_total/1000000)*100.0))/10)
         mem_perc_on_count = mem_perc_on * (mem_perc + 1)
         mem_perc_off_count = mem_perc_off * (11 - len(mem_perc_on_count))
         self.mem_load_perc_bar["foreground"] = "violet red"
@@ -319,7 +349,17 @@ class MainWindow():
         
         cpu = Cpu(monitoring_latency=1)
         return cpu.load
-
+    #    
+    # MW.Destroy Me
+    #      
+    def destroyMe(self):
+        self.master.destroy()
+    #    
+    # MW.Destroy Application
+    #    
+    def destroyApplication(self,timeToSleep=0):
+        if timeToSleep > 0:
+            self.master.after(timeToSleep*1000, self.destroyMe)
     #    
     # Options Menu Class (OM)
     #
