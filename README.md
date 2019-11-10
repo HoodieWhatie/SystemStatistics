@@ -1,7 +1,7 @@
 # SystemStatistics
 
 <b>Disclaimer:</b>
-1) This script was developed on a RPi 4 running Rasbpian using Python3. 
+1) This script was developed on a RPi 4 running `Raspbian GNU/Linux 10 (buster)` using Python3. 
 There is always a chance that some of the underlying evironment on your device is different and that can cause certain commands to vary and potentialy throw exceptions. 
 2) You will need to confirm that you have python3.x installed on your device. 
 This can be accomplished by typing `python3 -V` into your terminal and pressing `Enter` inside your bash terminal. 
