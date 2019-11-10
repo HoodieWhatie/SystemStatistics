@@ -1,9 +1,13 @@
+from gpiozero import LED
 import psutil # Allows access to virtual memor stats
 from pyspectator.processor import Cpu # Python library for access resource stats (CPU)
 from pyspectator.network import NetworkInterface # Library for access resource stats (NIC) 
 from pythonping import ping # Library used for the simplified running of network commands
 import re # Regex for detecting patterns in strings
+import RPi.GPIO as GPIO
+from signal import pause
 import subprocess # Library for running terminal commands through Python
+from time import sleep
 import tkinter as tk # Library used to create the GUI and its widgets
 from tkinter import *
 import tkinter.ttk as ttk
@@ -27,9 +31,13 @@ class MainWindow():
         # Object Variables
         self.last_ip = ""
         self.pingLatList = []
-        self.sleepTime = 1000
+        self.sleepTime = 500
         self.isStopped = False
         self.cpuTempCelsius = True
+        self.ledBoard = False
+        self.ledPins = [5,11,9,10,22,27,17,4,15,14]
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(self.ledPins, GPIO.OUT)
         
         # Create Window Elements
         self.master = master
@@ -147,7 +155,7 @@ class MainWindow():
     def loadOptionsMenu(self):
         self.optionsMenu = tk.Toplevel(self.master)
         self.optionsMenu.title("Options")
-        self.optionsMenu.geometry("300x45")
+        self.optionsMenu.geometry("300x65")
         self.optionsMenu.main_container = ttk.Frame(self.optionsMenu, style="TFrame")
         self.optionsMenu.main_container.pack(side="top", fill="both", expand=True)
         self.loadOptionsWidgets()
@@ -158,12 +166,15 @@ class MainWindow():
     def loadOptionsWidgets(self):
         self.optionsMenu.celsiusCheckbutton = ttk.Checkbutton(self.optionsMenu.main_container,text="Toggle ˚F",
                                                          variable=self.cpuTempCelsius,command=self.toggleCelsius)
+        self.optionsMenu.ledCheckbutton = ttk.Checkbutton(self.optionsMenu.main_container,text="CPU Load LEDs",
+                                                          variable=self.ledBoard,command=self.toggleLEDs)
         self.optionsMenu.closeButton = ttk.Button(self.optionsMenu.main_container,text="Close",command=self.closeMenu,style="TButton")
     #
     # MW.Run Options Menu
     #
     def runOptionsMenu(self):
         self.optionsMenu.celsiusCheckbutton.pack()
+        self.optionsMenu.ledCheckbutton.pack()
         self.optionsMenu.closeButton.pack()
     #
     # MW.Toggle Celsius
@@ -174,10 +185,18 @@ class MainWindow():
         else:
             self.cpuTempCelsius = True
     #
+    # MW.Toggle LEDs
+    #
+    def toggleLEDs(self):
+        if self.ledBoard:
+            self.ledBoard = False
+        else:
+            self.ledBoard = True
+    #
     # MW.Celsius Toggle
     #
     def closeMenu(self):
-            self.optionsMenu.destroy()
+        self.optionsMenu.destroy()
     #    
     # MW.Update GUI
     #
@@ -224,7 +243,15 @@ class MainWindow():
         cpu_perc_off_count = cpu_perc_off * (11 - len(cpu_perc_on_count))
         self.cpu_load_perc_bar["foreground"] = "violet red"
         self.cpu_load_perc_bar["text"] = f"CPU Load:\n[{cpu_perc_on_count}{cpu_perc_off_count}]"
-        
+        # CPU Load LEDs
+        pins = int(_cpu_load/10)
+        #pinsOff = int(_cpu_load/10)
+        if self.ledBoard:
+            print(f"On: {self.ledPins[:pins]}")
+            print(f"Off: {self.ledPins[pins:]}")
+            GPIO.output(self.ledPins[:pins], GPIO.HIGH)
+            GPIO.output(self.ledPins[pins:], GPIO.LOW)
+
         # Memory
         mem = self.find_memory_stats()
         if mem.percent < 50:
