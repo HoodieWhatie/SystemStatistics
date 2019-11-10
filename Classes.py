@@ -18,9 +18,7 @@ mycolor2 = "#430040"
 
 # ToDoList
 #  
-# 1) Switch between C and F for CPU temp with radio button
-# 2) Create "percentage bars" for CPU Load, RAM Utilization
-# 3) Add Menu system with options
+# All items completed
 #
 #    
 # Main Window (MW)
@@ -247,8 +245,6 @@ class MainWindow():
         pins = int(_cpu_load/10)
         #pinsOff = int(_cpu_load/10)
         if self.ledBoard:
-            print(f"On: {self.ledPins[:pins]}")
-            print(f"Off: {self.ledPins[pins:]}")
             GPIO.output(self.ledPins[:pins], GPIO.HIGH)
             GPIO.output(self.ledPins[pins:], GPIO.LOW)
 
