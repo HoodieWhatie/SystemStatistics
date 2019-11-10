@@ -21,9 +21,10 @@ mycolor2 = "#430040"
 # 2) Create "percentage bars" for CPU Load, RAM Utilization
 # 3) Add Menu system with options
 
-
+    #    
+    # Main Window (MW)
+    #
 class MainWindow():
-    
     def __init__(self, master):
         
         # Object Variables
@@ -40,7 +41,9 @@ class MainWindow():
         self.menus()
         self.master.after(self.sleepTime, self.run)
         self.master.mainloop()
-        
+    #    
+    # MW.Build Master Window
+    #    
     def build_master_window(self):
         #self.master.tk_setPalette(background=mycolor, foreground="black", activeBackground="white", activeForeground="black")
         self.style = ttk.Style()
@@ -83,7 +86,9 @@ class MainWindow():
         self.style.theme_use("app_style")
         self.master.geometry("600x150")
         self.master.title("SystemStatistics")
-        
+    #    
+    # MW.Positioning Frames
+    #    
     def positioning_frames(self):
         self.main_container = ttk.Frame(self.master, style="TFrame")
         self.top_frame = ttk.Frame(self.main_container, style="TFrame")
@@ -99,7 +104,9 @@ class MainWindow():
         self.top_right.pack(side="right", fill="x", expand=False)
         self.bottom_left.pack(side="left", fill="x", expand=True)
         self.bottom_right.pack(side="right", fill="x", expand=True)
-
+    #    
+    # MW.Widgets
+    #
     def widgets(self):
         self.cpu_temp = ttk.Label(self.top_left, text="CPUTemp:", font="Calibri 12 bold", justify="left")
         self.cpu_load = ttk.Label(self.top_left, text="CPULoad:", font="Calibri 12 bold", justify="left")
@@ -110,14 +117,18 @@ class MainWindow():
         self.cpu_load_perc_bar = ttk.Label(self.top_frame, font="Calibri 8 bold", text="")
         self.mem_load_perc_bar = ttk.Label(self.top_frame, font="Calibri 8 bold", text="")
         self.close_button = ttk.Button(self.bottom_frame, command=self.master.destroy, text="Close",style="TButton")
-        
+    #    
+    # MW.Menus
+    #        
     def menus(self):
         self.menu01 = tk.Menu(self.master)
         self.submenu01 = tk.Menu(self.menu01, tearoff=False)
         self.submenu01.add_command(label="Options",command=self.loadOptionsMenu)
         self.menu01.add_cascade(label="File", menu=self.submenu01)
         self.master.config(menu=self.menu01)
-        
+    #    
+    # MW.Run
+    #        
     def run(self):
         if not self.isStopped:
             self.cpu_temp.pack()
@@ -131,20 +142,27 @@ class MainWindow():
             self.close_button.pack()
             self.updateGUI()
             self.master.after(self.sleepTime, self.run)
-      
+    #    
+    # MW.Destroy Me
+    #      
     def destroyMe(self):
         self.master.destroy()
-    
+    #    
+    # MW.Destroy Application
+    #    
     def destroyApplication(self,timeToSleep=0):
         if timeToSleep > 0:
             self.master.after(timeToSleep*1000, self.destroyMe)
-      
+    #    
+    # MW.Load Options Menu
+    #     
     def loadOptionsMenu(self):
         optionsMenu = tk.Toplevel(self.master)
         optionsMenu.title("Options")
         optionsMenu.geometry("300x300")
-        
-      
+    #    
+    # MW.Update GUI
+    #
     def updateGUI(self):
         # CPU Temp
         _cpu_temp = float(self.find_cpu_temp())
@@ -188,13 +206,7 @@ class MainWindow():
         else:
             self.memory_stats["foreground"] = "red"
             self.memory_stats["text"] = f"RAM: {int(mem.used/1000000)}MB of {int(mem.total/1000000)}MB"        
-        
-        # ASCII Codes
-        #
-        # 35: #
-        # 4510: ᆞ
-        # 8718: ∎
-        #
+
         mem_perc_on = chr(8718)
         mem_perc_off = chr(4510)
         mem_used = float("%.2f" % (mem.used/1000000))
@@ -232,7 +244,9 @@ class MainWindow():
         self.mac["foreground"] = "white"
         self.mac["text"] = f"MAC: {self.find_network_mac()}"
         self.master.update()
-        
+    #    
+    # MW.Check Network Status
+    #        
     def check_network_status(self):
         
         x = [str(reply) for reply in list(ping("8.8.8.8"))]
@@ -271,34 +285,45 @@ class MainWindow():
             return (float(latency),successes,failures,max(self.pingLatList),min(self.pingLatList))
         else:
             return (0,successes,failures)
-        
+    #    
+    # MW.Find Network MAC
+    #        
     def find_network_mac(self):
         
         net = NetworkInterface(monitoring_latency=1)
         return f"{net.hardware_address}"
-    
+    #    
+    # MW.Find Network IP
+    #    
     def find_network_ip(self):
         
         net = NetworkInterface(monitoring_latency=1)
         return f"{net.ip_address}"
-    
+    #    
+    # MW.Find Memory Stats
+    #    
     def find_memory_stats(self):
         return psutil.virtual_memory()
-    
+    #    
+    # MW.Find CPU Temp
+    #    
     def find_cpu_temp(self):
         
         cpu_temp = str(subprocess.check_output("vcgencmd measure_temp", shell=True))
         x = re.search("\d+\.\d+", cpu_temp)
         return x.group(0)
-    
+    #    
+    # MW.Find CPU Load
+    #    
     def find_cpu_load(self):
         
         cpu = Cpu(monitoring_latency=1)
         return cpu.load
 
-
+    #    
+    # Options Menu Class (OM)
+    #
 class OptionsMenu():
-    
     def __init__(self, master):
         
         # Object Variables
@@ -315,12 +340,16 @@ class OptionsMenu():
         self.menus()
         self.master.after(self.sleepTime, self.run)
         self.master.mainloop()
-
+    #    
+    # OM.Build Master Window
+    #
     def build_master_window(self):
         self.style.theme_use("app_style")
         self.master.geometry("150x150")
         self.master.title("SystemStatistics")
-        
+    #    
+    # OM.Positioning Frames
+    #       
     def positioning_frames(self):
         self.main_container = ttk.Frame(self.master, style="TFrame")
         self.top_frame = ttk.Frame(self.main_container, style="TFrame")
@@ -336,22 +365,32 @@ class OptionsMenu():
         self.top_right.pack(side="right", fill="x", expand=False)
         self.bottom_left.pack(side="left", fill="x", expand=True)
         self.bottom_right.pack(side="right", fill="x", expand=True)
-
+    #    
+    # OM.Widgets
+    #
     def widgets(self):
         self.close_button = ttk.Button(self.bottom_frame, command=self.master.destroy, text="Close",style="TButton")
-        
+    #    
+    # OM.Run
+    #      
     def run(self):
         if not self.isStopped:
             self.close_button.pack(bottom_frame, style="TButton")
             self.updateGUI()
             self.master.after(self.sleepTime, self.run)
-      
+    #    
+    # OM.Destroy Me
+    #      
     def destroyMe(self):
         self.master.destroy()
-    
+    #    
+    # OM.Destroy Application
+    #    
     def destroyApplication(self,timeToSleep=0):
         if timeToSleep > 0:
             self.master.after(timeToSleep*1000, self.destroyMe)
-      
+    #    
+    # OM.Update GUI
+    #     
     def updateGUI(self):
         print("updating gui")
