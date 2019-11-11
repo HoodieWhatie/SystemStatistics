@@ -90,7 +90,7 @@ class MainWindow():
         "Horizontal.TProgressbar":{"configure": {"background": "slate gray"}}
         })
         self.style.theme_use("app_style")
-        self.master.geometry("500x150")
+        self.master.geometry("550x175")
         self.master.title("SystemStatistics")
     #    
     # MW.Positioning Frames
@@ -105,7 +105,7 @@ class MainWindow():
         self.bottomRight = ttk.Frame(self.bottomFrame, style="TFrame")
         self.mainContainer.pack(side="top", fill="both", expand=True)
         self.topFrame.pack(side="top", fill="x", expand=False)
-        self.bottomFrame.pack(side="bottom", fill="both", expand=False)
+        self.bottomFrame.pack(side="bottom", fill="x", expand=False)
         self.topLeft.pack(side="left", fill="x", padx=0, pady=0, expand=False)
         self.topRight.pack(side="right", fill="x", expand=False)
         self.bottomLeft.pack(side="left", fill="x", expand=False)
