@@ -1,7 +1,7 @@
-from gpiozero import LED
 import psutil # Allows access to virtual memor stats
-from pyspectator.processor import Cpu # Python library for access resource stats (CPU)
-from pyspectator.network import NetworkInterface # Library for access resource stats (NIC) 
+from pyspectator.computer import Computer # Python library for accessing system architecture variables
+from pyspectator.processor import Cpu # Python library for accessing resource stats (CPU)
+from pyspectator.network import NetworkInterface # Library for accessing resource stats (NIC) 
 from pythonping import ping # Library used for the simplified running of network commands
 import re # Regex for detecting patterns in strings
 import RPi.GPIO as GPIO
@@ -90,7 +90,7 @@ class MainWindow():
         "Horizontal.TProgressbar":{"configure": {"background": "slate gray"}}
         })
         self.style.theme_use("app_style")
-        self.master.geometry("600x150")
+        self.master.geometry("500x150")
         self.master.title("SystemStatistics")
     #    
     # MW.Positioning Frames
@@ -108,7 +108,7 @@ class MainWindow():
         self.bottomFrame.pack(side="bottom", fill="both", expand=False)
         self.topLeft.pack(side="left", fill="x", padx=0, pady=0, expand=False)
         self.topRight.pack(side="right", fill="x", expand=False)
-        self.bottomLeft.pack(side="left", fill="x", expand=True)
+        self.bottomLeft.pack(side="left", fill="x", expand=False)
         self.bottomRight.pack(side="right", fill="x", expand=True)
     #    
     # MW.Widgets
@@ -118,11 +118,9 @@ class MainWindow():
         self.cpuLoad = ttk.Label(self.topLeft, text="CPULoad:", font="Calibri 12 bold", justify="left")
         self.memoryStats = ttk.Label(self.topLeft, text="RAM:", font="Calibri 12 bold", justify="left")
         self.networkStatus = ttk.Label(self.topRight, text="NetStatus:", font="Calibri 12 bold", justify="right")
-        self.ip = ttk.Label(self.bottomFrame, text="IP:")
-        self.mac = ttk.Label(self.bottomFrame, text="MAC:")
-        self.cpuLoadPercBar = ttk.Label(self.topFrame, font="Calibri 8 bold", text="")
-        self.memLoadPercBar = ttk.Label(self.topFrame, font="Calibri 8 bold", text="")
-        self.closeButton = ttk.Button(self.bottomFrame, command=self.master.destroy, text="Close",style="TButton")
+        self.cpuLoadPercBar = ttk.Label(self.topFrame, font="Calibri 10", text="")
+        self.memLoadPercBar = ttk.Label(self.topFrame, font="Calibri 10 ", text="")
+        self.pcInfo = ttk.Label(self.bottomFrame, font="Calibri 8 bold", text="")
     #    
     # MW.Menus
     #        
@@ -130,6 +128,7 @@ class MainWindow():
         self.menu01 = tk.Menu(self.master)
         self.submenu01 = tk.Menu(self.menu01, tearoff=False)
         self.submenu01.add_command(label="Options",command=self.loadOptionsMenu)
+        self.submenu01.add_command(label="Close",command=self.destroyApplication)
         self.menu01.add_cascade(label="File", menu=self.submenu01)
         self.master.config(menu=self.menu01)
     #    
@@ -143,9 +142,7 @@ class MainWindow():
             self.networkStatus.pack()
             self.cpuLoadPercBar.pack()
             self.memLoadPercBar.pack()
-            self.ip.pack()
-            self.mac.pack()
-            self.closeButton.pack()
+            self.pcInfo.pack()
             self.updateGUI()
             self.master.after(self.sleepTime, self.run)
     #    
@@ -200,6 +197,12 @@ class MainWindow():
     # MW.Update GUI
     #
     def updateGUI(self):
+        
+        # System Information
+        systemInfo = self.pullPCInfo()
+        self.pcInfo["foreground"] = "white"
+        self.pcInfo["text"] = f"System Details\nHostname: {systemInfo[0]}\nOS: {systemInfo[1]}\nCPU: {systemInfo[2]}\nCores: {systemInfo[3]}\nIP: {systemInfo[4]}\nMAC: {systemInfo[5]}"
+        
         # CPU Temp 
         if self.cpuTempCelsius: 
             _cpuTemp = float(self.findCPUTemp()) # CELSIUS
@@ -235,6 +238,7 @@ class MainWindow():
         else:
             self.cpuLoad["foreground"] = "red"
             self.cpuLoad["text"] = f"CPULoad: {_cpuLoad}%"
+            
         # CPU Load Bar
         cpuPercOn = chr(8718)
         cpuPercOff = chr(4510)
@@ -242,9 +246,9 @@ class MainWindow():
         cpuPercOffCount = cpuPercOff * (11 - len(cpuPercOnCount))
         self.cpuLoadPercBar["foreground"] = "violet red"
         self.cpuLoadPercBar["text"] = f"CPU Load:\n[{cpuPercOnCount}{cpuPercOffCount}]"
+        
         # CPU Load LEDs
         pins = int(_cpuLoad/10)
-        #pinsOff = int(_cpuLoad/10)
         if self.ledBoard:
             GPIO.output(self.ledPins[:pins], GPIO.HIGH)
             GPIO.output(self.ledPins[pins:], GPIO.LOW)
@@ -260,6 +264,7 @@ class MainWindow():
         else:
             self.memoryStats["foreground"] = "red"
             self.memoryStats["text"] = f"RAM: {int(mem.used/1000000)}MB of {int(mem.total/1000000)}MB"        
+        
         # Memory Bar
         memPercOn = chr(8718)
         memPercOff = chr(4510)
@@ -286,18 +291,21 @@ class MainWindow():
         except OSError:
             self.networkStatus["foreground"] = "red"
             self.networkStatus["text"] = f"NetStatus: Failed"
+    #
+    # MW.Pull PC Info
+    #
+    def pullPCInfo(self):
+        cpu = Cpu(monitoring_latency=1)
+        comp = Computer()
         
-        # IP Address
-        currentIP = self.findNetworkIP()
-        if currentIP != self.lastIP:
-            lastIP = currentIP
-            self.ip["foreground"] = "white"
-            self.ip["text"] = f"IP: {lastIP}"
+        os = comp.os
+        hostname = comp.hostname
+        cpuName = cpu.name
+        cpuCoreCount = cpu.count
+        ip = self.findNetworkIP()
+        mac = self.find_network_mac()
         
-        # MAC Address
-        self.mac["foreground"] = "white"
-        self.mac["text"] = f"MAC: {self.find_network_mac()}"
-        self.master.update()
+        return (hostname, os, cpuName, cpuCoreCount, ip, mac)
     #    
     # MW.Check Network Status
     #        
@@ -384,6 +392,8 @@ class MainWindow():
     def destroyApplication(self,timeToSleep=0):
         if timeToSleep > 0:
             self.master.after(timeToSleep*1000, self.destroyMe)
+        else:
+            self.destroyMe()
     #    
     # Options Menu Class (OM)
     #
