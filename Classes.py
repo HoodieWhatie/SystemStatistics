@@ -39,6 +39,7 @@ class MainWindow():
         
         # Create Window Elements
         self.master = master
+        self.master.attributes("-topmost", True)
         self.buildMasterWindow()
         self.positioningFrames()
         self.widgets()
